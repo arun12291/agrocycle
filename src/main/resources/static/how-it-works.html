@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>How It Works — AgroCycle</title>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    .hiw-hero{background:linear-gradient(135deg,#1a4a1a,#2d6a2d);color:#fff;padding:70px 20px;text-align:center;}
+    .hiw-hero h1{font-size:2.4rem;margin-bottom:10px;}
+    .hiw-hero p{font-size:1.1rem;opacity:.9;max-width:600px;margin:0 auto;}
+    .steps-section{padding:60px 20px;max-width:900px;margin:0 auto;}
+    .steps-section h2{text-align:center;color:#2d6a2d;font-size:1.8rem;margin-bottom:40px;}
+    .step{display:flex;gap:24px;margin-bottom:40px;align-items:flex-start;}
+    .step-num{background:#2d6a2d;color:#fff;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;flex-shrink:0;}
+    .step-content h3{color:#1a4a1a;font-size:1.2rem;margin-bottom:8px;}
+    .step-content p{color:#555;line-height:1.7;}
+    .roles-section{background:#f4f8f4;padding:60px 20px;}
+    .roles-section h2{text-align:center;color:#2d6a2d;font-size:1.8rem;margin-bottom:36px;}
+    .roles-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px;max-width:900px;margin:0 auto;}
+    .role-card{background:#fff;border-radius:12px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,.08);text-align:center;}
+    .role-card .icon{font-size:3rem;margin-bottom:12px;}
+    .role-card h3{color:#2d6a2d;margin-bottom:10px;}
+    .role-card p{color:#666;font-size:.95rem;line-height:1.6;}
+    .cta-section{text-align:center;padding:60px 20px;background:#2d6a2d;color:#fff;}
+    .cta-section h2{font-size:2rem;margin-bottom:16px;}
+    .cta-section p{margin-bottom:28px;opacity:.9;}
+    .btn-white{background:#fff;color:#2d6a2d;padding:14px 32px;border-radius:8px;font-size:1.05rem;font-weight:600;text-decoration:none;display:inline-block;}
+    .btn-white:hover{background:#f0f0f0;}
+    @media(max-width:600px){.step{flex-direction:column;}}
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/" class="logo">🌿 AgroCycle</a>
+    <div class="nav-links">
+      <a href="/marketplace.html">Marketplace</a>
+      <a href="/how-it-works.html" class="active">How It Works</a>
+      <a href="/about.html">About</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="nav-auth">
+      <a href="/login.html" id="loginBtn" class="btn-outline">Login</a>
+      <a href="/register.html" id="registerBtn" class="btn-primary">Register</a>
+      <div id="userMenu" class="hidden" style="display:flex;gap:12px;align-items:center;">
+        <a href="/dashboard.html" class="btn-outline">Dashboard</a>
+        <span id="userGreet" style="color:#2d6a2d;font-weight:600;"></span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="hiw-hero">
+  <h1>How AgroCycle Works</h1>
+  <p>Connecting farmers with buyers to reduce crop waste and create value from agricultural residues</p>
+</div>
+
+<div class="steps-section">
+  <h2>For Sellers (I HAVE crop waste)</h2>
+  <div class="step"><div class="step-num">1</div><div class="step-content"><h3>Register & Create Your Profile</h3><p>Sign up for free as a Farmer/Buyer. Add your location details so buyers near you can find your listings easily.</p></div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-content"><h3>Post a Listing</h3><p>Click "Post My Crop Waste" from your dashboard. Fill in the product name, category (paddy straw, wheat straw, etc.), quantity, price per unit, and add photos. Choose "I HAVE" as listing type.</p></div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-content"><h3>Receive & Approve Orders</h3><p>Buyers will send order requests. You'll get a notification. Review the request and approve or reject it. You control who buys your material.</p></div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-content"><h3>Arrange Delivery & Get Paid</h3><p>Once approved, our system finds a delivery person. They pick up the material and deliver it. Complete the transaction and earn income from waste that used to be burned!</p></div></div>
+</div>
+
+<div class="roles-section">
+  <h2>For Buyers (I NEED crop waste)</h2>
+  <div class="steps-section" style="padding:0;max-width:900px;margin:0 auto;">
+    <div class="step"><div class="step-num">1</div><div class="step-content"><h3>Browse the Marketplace</h3><p>Search by crop type, location, price range, or quantity. Filter for exactly what your farm or business needs.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><h3>Request Material</h3><p>Click on a listing, enter the quantity you need and your delivery address. Submit the order request to the seller.</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><h3>Seller Approves, Delivery is Arranged</h3><p>If the seller approves, a delivery person is automatically matched and assigned. You'll receive an OTP for delivery confirmation.</p></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content"><h3>Receive & Confirm</h3><p>Once delivered, share the OTP with the delivery person, then confirm receipt on the platform. Leave a review for the seller!</p></div></div>
+  </div>
+</div>
+
+<div class="roles-grid" style="max-width:900px;margin:40px auto;padding:0 20px;">
+  <div class="role-card"><div class="icon">👨‍🌾</div><h3>Farmer / Buyer</h3><p>One account for both selling your crop waste and buying materials from others. No separate accounts needed.</p></div>
+  <div class="role-card"><div class="icon">🚛</div><h3>Delivery Person</h3><p>Apply to become a delivery partner. Get matched to nearby orders automatically. Build income delivering agricultural materials.</p></div>
+  <div class="role-card"><div class="icon">⚙️</div><h3>Admin</h3><p>Platform administrators manage users, approve delivery persons, handle support tickets and keep the marketplace healthy.</p></div>
+</div>
+
+<div class="cta-section">
+  <h2>Ready to Get Started?</h2>
+  <p>Join thousands of farmers turning crop waste into income</p>
+  <a href="/register.html" class="btn-white">Create Free Account</a>
+</div>
+
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-section"><h4>🌿 AgroCycle</h4><p>Intelligent Crop Waste Exchange Platform</p></div>
+    <div class="footer-section"><h4>Links</h4><a href="/marketplace.html">Marketplace</a><a href="/how-it-works.html">How It Works</a><a href="/about.html">About</a></div>
+    <div class="footer-section"><h4>Account</h4><a href="/register.html">Register</a><a href="/login.html">Login</a><a href="/dashboard.html">Dashboard</a></div>
+  </div>
+  <div class="footer-bottom"><p>© 2026 AgroCycle. Reducing crop waste, building futures.</p></div>
+</footer>
+<script src="/js/common.js"></script>
+<script>checkAuth();</script>
+</body>
+</html>

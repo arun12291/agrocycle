@@ -1,0 +1,40 @@
+# Compiled class files
+*.class
+target/
+
+# Log files
+*.log
+logs/
+
+# Maven
+.mvn/timing.properties
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment / secrets - NEVER commit these
+.env
+*.env
+application-local.properties
+application-prod.properties
+
+# Uploaded files - managed separately
+uploads/
+src/main/resources/uploads/
+
+# Test output
+src/test/resources/uploads/
+
+# Build artifacts
+*.jar
+*.war

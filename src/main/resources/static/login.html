@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — AgroCycle</title>
+<link rel="stylesheet" href="/css/main.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a class="nav-logo" href="/">🌾 AgroCycle</a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/marketplace.html">Marketplace</a></li>
+    </ul>
+    <div class="nav-auth">
+      <a href="/register.html" class="btn btn-primary">Register</a>
+    </div>
+  </div>
+</nav>
+
+<div class="form-page">
+  <div class="form-card">
+    <h2>🌾 Welcome Back</h2>
+    <p>Sign in to your AgroCycle account</p>
+    <div id="alertBox" class="alert-error hidden"></div>
+    <form id="loginForm" onsubmit="doLogin(event)">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="your@email.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Your password" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary w-full btn-lg" id="submitBtn">Sign In</button>
+    </form>
+    <div style="text-align:center;margin-top:1rem;">
+      <p>Don't have an account? <a href="/register.html">Register here</a></p>
+      <p style="margin-top:0.5rem;">Delivery partner? <a href="/register-delivery.html">Apply here</a></p>
+    </div>
+  </div>
+</div>
+<script src="/js/common.js"></script>
+<script>
+// If already logged in, redirect
+document.addEventListener('DOMContentLoaded', async () => {
+  const user = await checkAuth();
+  if (user) redirectByRole(user);
+});
+
+async function doLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  const alertBox = document.getElementById('alertBox');
+  alertBox.classList.add('hidden');
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
+      body: JSON.stringify({ email: document.getElementById('email').value, password: document.getElementById('password').value })
+    });
+    const data = await res.json();
+    if (!res.ok) { alertBox.textContent = data.error || 'Login failed'; alertBox.classList.remove('hidden'); return; }
+    redirectByRole(data);
+  } catch(err) {
+    alertBox.textContent = 'Connection error. Please try again.';
+    alertBox.classList.remove('hidden');
+  } finally { btn.disabled = false; btn.textContent = 'Sign In'; }
+}
+
+function redirectByRole(user) {
+  const redirect = new URLSearchParams(window.location.search).get('redirect');
+  if (redirect) { window.location.href = redirect; return; }
+  if (user.role === 'ADMIN') window.location.href = '/admin.html';
+  else if (user.role === 'DELIVERY_PERSON') window.location.href = '/delivery-dashboard.html';
+  else window.location.href = '/dashboard.html';
+}
+</script>
+</body>
+</html>

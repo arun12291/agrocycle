@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroCycle – Intelligent Crop Waste Exchange Platform</title>
+<link rel="stylesheet" href="/css/main.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar">
+  <div class="nav-container">
+    <a class="nav-logo" href="/">🌾 AgroCycle</a>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/">Home</a></li>
+      <li><a href="/marketplace.html">Marketplace</a></li>
+      <li><a href="/how-it-works.html">How It Works</a></li>
+      <li><a href="/about.html">About</a></li>
+      <li><a href="/contact.html">Contact</a></li>
+    </ul>
+    <div class="nav-auth" id="navAuth">
+      <span id="notifBell" class="notif-bell hidden" onclick="toggleNotifPanel()">🔔 <span id="notifCount" class="badge">0</span></span>
+      <a href="/login.html" class="btn btn-outline" id="loginBtn">Login</a>
+      <a href="/register.html" class="btn btn-primary" id="registerBtn">Register</a>
+      <div class="user-menu hidden" id="userMenu">
+        <span id="userGreet"></span>
+        <a href="/dashboard.html" class="btn btn-outline">Dashboard</a>
+        <button onclick="logout()" class="btn btn-outline">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Notification Panel -->
+<div id="notifPanel" class="notif-panel hidden">
+  <div class="notif-header">
+    <h3>Notifications</h3>
+    <button onclick="markAllRead()" class="link-btn">Mark all read</button>
+    <button onclick="toggleNotifPanel()" class="link-btn">✕</button>
+  </div>
+  <div id="notifList" class="notif-list">Loading...</div>
+</div>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Turn Crop Waste Into Value</h1>
+    <p>AgroCycle connects farmers, buyers and recyclers to exchange agricultural residues — reducing burning, creating income and supporting a circular economy.</p>
+    <div class="hero-search">
+      <input type="text" id="heroSearch" placeholder="Search paddy straw, wheat straw, coconut husk..." autocomplete="off">
+      <div id="searchSuggestions" class="suggestions-dropdown hidden"></div>
+      <button onclick="heroSearch()" class="btn btn-primary btn-lg">Search</button>
+    </div>
+    <div class="hero-btns">
+      <a href="/marketplace.html?type=I_HAVE" class="btn btn-green btn-lg">🌾 I HAVE — Post Surplus</a>
+      <a href="/marketplace.html?type=I_NEED" class="btn btn-orange btn-lg">🛒 I NEED — Find Material</a>
+    </div>
+  </div>
+  <div class="hero-image">
+    <div class="hero-illustration">🌿</div>
+  </div>
+</section>
+
+<!-- Category Shortcuts -->
+<section class="categories section">
+  <div class="container">
+    <h2 class="section-title">Browse by Category</h2>
+    <div class="category-grid" id="categoryGrid">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- Featured Listings -->
+<section class="featured section bg-light">
+  <div class="container">
+    <h2 class="section-title">Featured Listings</h2>
+    <div class="listings-grid" id="featuredListings">
+      <div class="loading">Loading listings...</div>
+    </div>
+    <div class="text-center mt-3">
+      <a href="/marketplace.html" class="btn btn-primary">View All Listings →</a>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="how-it-works section" id="how">
+  <div class="container">
+    <h2 class="section-title">How AgroCycle Works</h2>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-icon">📝</div>
+        <h3>1. Register</h3>
+        <p>Create a free account as a farmer, buyer, or both. One account for buying and selling.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">📦</div>
+        <h3>2. Post or Find</h3>
+        <p>Post what you have or browse what you need. Filter by category, location and price.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">🤝</div>
+        <h3>3. Connect & Agree</h3>
+        <p>Buyer requests a quantity. Seller reviews and accepts or declines. You're notified instantly.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">🚚</div>
+        <h3>4. Automatic Delivery</h3>
+        <p>AgroCycle automatically finds a nearby delivery person. Track status from pickup to delivery.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">✅</div>
+        <h3>5. Confirm & Review</h3>
+        <p>Confirm delivery with a secure OTP. Leave a review to help the community.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Environmental Benefits -->
+<section class="impact section bg-green">
+  <div class="container">
+    <h2 class="section-title text-white">Environmental Impact</h2>
+    <div class="impact-grid">
+      <div class="impact-card">
+        <div class="impact-number" id="totalMaterial">—</div>
+        <div class="impact-label">Tonnes of Material Exchanged</div>
+        <small class="impact-note">Estimated from completed transactions</small>
+      </div>
+      <div class="impact-card">
+        <div class="impact-number" id="totalTransactions">—</div>
+        <div class="impact-label">Completed Transactions</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-number" id="totalListings">—</div>
+        <div class="impact-label">Active Listings</div>
+      </div>
+    </div>
+    <p class="impact-disclaimer">* Emission reduction estimates require validated calculation methods and are not shown to avoid inaccurate claims. Material reuse quantities are based on completed orders.</p>
+  </div>
+</section>
+
+<!-- Reviews Section -->
+<section class="reviews section">
+  <div class="container">
+    <h2 class="section-title">What Our Community Says</h2>
+    <div class="reviews-grid" id="reviewsGrid">
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p>"Found a steady buyer for my paddy straw. No more burning and extra income every season!"</p>
+        <strong>— Farmer from Punjab</strong>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p>"AgroCycle helped my mushroom farm source wheat straw consistently. The delivery system is smooth."</p>
+        <strong>— Mushroom Grower, Haryana</strong>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★☆</div>
+        <p>"Great platform for finding sugarcane bagasse for our biomass plant. The notifications keep us updated."</p>
+        <strong>— Biomass Plant Manager, UP</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI Assistant -->
+<div id="chatWidget" class="chat-widget">
+  <button class="chat-toggle" onclick="toggleChat()">💬 Ask AgroCycle</button>
+  <div id="chatBox" class="chat-box hidden">
+    <div class="chat-header">
+      <span>🌾 AgroCycle Assistant</span>
+      <button onclick="toggleChat()">✕</button>
+    </div>
+    <div id="chatMessages" class="chat-messages">
+      <div class="chat-msg bot">Hello! I'm your AgroCycle assistant. Ask me about buying, selling, delivery, or crop waste uses!</div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Ask something..." onkeypress="if(event.key==='Enter')sendChat()">
+      <button onclick="sendChat()">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- Contact / Footer -->
+<footer class="footer">
+  <div class="container footer-grid">
+    <div>
+      <h3>🌾 AgroCycle</h3>
+      <p>Intelligent Crop Waste Exchange Platform</p>
+      <p>Connecting farmers, buyers and recyclers for a greener tomorrow.</p>
+    </div>
+    <div>
+      <h4>Quick Links</h4>
+      <ul class="footer-links">
+        <li><a href="/marketplace.html">Marketplace</a></li>
+        <li><a href="/how-it-works.html">How It Works</a></li>
+        <li><a href="/register.html">Register</a></li>
+        <li><a href="/register-delivery.html">Become a Delivery Partner</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Support</h4>
+      <ul class="footer-links">
+        <li><a href="/about.html">About Us</a></li>
+        <li><a href="/contact.html">Contact</a></li>
+        <li><a href="/dashboard.html">My Dashboard</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <p>📧 support@agrocycle.com</p>
+      <p>🌐 www.agrocycle.com</p>
+      <p>🕐 Mon–Sat, 9AM–6PM</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 AgroCycle. All rights reserved. | Reducing crop waste burning, one transaction at a time.</p>
+  </div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script src="/js/home.js"></script>
+</body>
+</html>

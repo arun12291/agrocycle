@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketplace — AgroCycle</title>
+<link rel="stylesheet" href="/css/main.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a class="nav-logo" href="/">🌾 AgroCycle</a>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/">Home</a></li>
+      <li><a href="/marketplace.html">Marketplace</a></li>
+      <li><a href="/how-it-works.html">How It Works</a></li>
+    </ul>
+    <div class="nav-auth" id="navAuth">
+      <span id="notifBell" class="notif-bell hidden" onclick="toggleNotifPanel()">🔔 <span id="notifCount" class="badge">0</span></span>
+      <a href="/login.html" class="btn btn-outline" id="loginBtn">Login</a>
+      <a href="/register.html" class="btn btn-primary" id="registerBtn">Register</a>
+      <div class="user-menu hidden" id="userMenu">
+        <span id="userGreet"></span>
+        <a href="/dashboard.html" class="btn btn-outline">Dashboard</a>
+        <button onclick="logout()" class="btn btn-outline">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+<div id="notifPanel" class="notif-panel hidden">
+  <div class="notif-header"><h3>Notifications</h3><button onclick="markAllRead()" class="link-btn">Mark all read</button><button onclick="toggleNotifPanel()" class="link-btn">✕</button></div>
+  <div id="notifList" class="notif-list">Loading...</div>
+</div>
+
+<div style="background:var(--green);color:white;padding:2rem;text-align:center">
+  <h1 style="font-size:1.8rem;font-weight:700">🌾 Marketplace</h1>
+  <p style="opacity:0.9">Find crop waste to buy or sell — paddy straw, wheat straw, coconut husk and more</p>
+  <div style="display:flex;gap:0.75rem;justify-content:center;margin-top:1rem;flex-wrap:wrap">
+    <a href="/marketplace.html?type=I_HAVE" class="btn btn-primary">🌾 I HAVE — Browse Surplus</a>
+    <a href="/marketplace.html?type=I_NEED" class="btn btn-outline">🛒 I NEED — Find Material</a>
+    <a href="/dashboard.html?tab=create" class="btn btn-outline" id="postBtn">+ Post Listing</a>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="container" style="padding-top:1.5rem">
+  <div class="filter-bar">
+    <div class="filter-group" style="flex:2;min-width:200px">
+      <label>🔍 Search</label>
+      <input type="text" id="fKeyword" placeholder="paddy straw, wheat, coconut...">
+    </div>
+    <div class="filter-group">
+      <label>Type</label>
+      <select id="fType">
+        <option value="">All</option>
+        <option value="I_HAVE">I HAVE</option>
+        <option value="I_NEED">I NEED</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Category</label>
+      <select id="fCategory">
+        <option value="">All Categories</option>
+        <option value="PADDY_STRAW_RICE_HUSK">Paddy Straw & Rice Husk</option>
+        <option value="WHEAT_STRAW">Wheat Straw</option>
+        <option value="SUGARCANE_LEAVES_BAGASSE">Sugarcane & Bagasse</option>
+        <option value="COTTON_STALKS">Cotton Stalks</option>
+        <option value="GROUNDNUT_SHELLS">Groundnut Shells</option>
+        <option value="COCONUT_HUSK">Coconut Husk</option>
+        <option value="MAIZE_STALKS">Maize Stalks</option>
+        <option value="VEGETABLE_WASTE">Vegetable Waste</option>
+        <option value="FRUIT_WASTE">Fruit Waste</option>
+        <option value="OTHER_RESIDUES">Other Residues</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>State</label>
+      <input type="text" id="fState" placeholder="e.g. Punjab">
+    </div>
+    <div class="filter-group">
+      <label>Sort By</label>
+      <select id="fSort">
+        <option value="newest">Newest First</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+        <option value="qty_desc">Most Quantity</option>
+      </select>
+    </div>
+    <div class="filter-group" style="min-width:80px">
+      <label>&nbsp;</label>
+      <button onclick="applyFilters()" class="btn btn-primary w-full">Apply</button>
+    </div>
+  </div>
+
+  <div id="resultsInfo" style="color:var(--text-muted);font-size:0.88rem;margin-bottom:1rem"></div>
+  <div class="listings-grid" id="listingsGrid">
+    <div class="loading">Loading listings...</div>
+  </div>
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<!-- AI Chat Widget -->
+<div id="chatWidget" class="chat-widget">
+  <button class="chat-toggle" onclick="toggleChat()">💬 Ask AgroCycle</button>
+  <div id="chatBox" class="chat-box hidden">
+    <div class="chat-header"><span>🌾 AgroCycle Assistant</span><button onclick="toggleChat()">✕</button></div>
+    <div id="chatMessages" class="chat-messages">
+      <div class="chat-msg bot">Hi! I can help you find the right crop waste category, explain filters, or answer questions about the marketplace. What do you need?</div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Ask something..." onkeypress="if(event.key==='Enter')sendChat()">
+      <button onclick="sendChat()">Send</button>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-bottom"><p>&copy; 2026 AgroCycle — Turning crop waste into value</p></div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script>
+const CATS = {
+  PADDY_STRAW_RICE_HUSK:'🌾',WHEAT_STRAW:'🌿',SUGARCANE_LEAVES_BAGASSE:'🎋',COTTON_STALKS:'🌼',
+  GROUNDNUT_SHELLS:'🥜',COCONUT_HUSK:'🥥',MAIZE_STALKS:'🌽',VEGETABLE_WASTE:'🥦',
+  FRUIT_WASTE:'🍎',OTHER_RESIDUES:'♻️'
+};
+let currentPage = 0;
+
+// Read URL params on load
+document.addEventListener('DOMContentLoaded', () => {
+  const p = new URLSearchParams(window.location.search);
+  if (p.get('type')) document.getElementById('fType').value = p.get('type');
+  if (p.get('category')) document.getElementById('fCategory').value = p.get('category');
+  if (p.get('keyword')) document.getElementById('fKeyword').value = p.get('keyword');
+  currentPage = 0;
+  loadListings();
+  // keyword enter
+  document.getElementById('fKeyword').addEventListener('keypress', e => { if(e.key==='Enter') applyFilters(); });
+});
+
+function applyFilters() { currentPage = 0; loadListings(); }
+
+async function loadListings() {
+  const grid = document.getElementById('listingsGrid');
+  grid.innerHTML = '<div class="loading">Searching listings...</div>';
+
+  const params = new URLSearchParams();
+  const kw = document.getElementById('fKeyword').value.trim();
+  const type = document.getElementById('fType').value;
+  const cat = document.getElementById('fCategory').value;
+  const state = document.getElementById('fState').value.trim();
+  const sort = document.getElementById('fSort').value;
+
+  if (kw) params.set('keyword', kw);
+  if (type) params.set('type', type);
+  if (cat) params.set('category', cat);
+  if (state) params.set('state', state);
+  params.set('sort', sort);
+  params.set('page', currentPage);
+  params.set('size', 12);
+
+  try {
+    const res = await fetch('/api/listings/public/search?' + params);
+    const data = await res.json();
+    const { content, totalElements, totalPages, number } = data;
+
+    document.getElementById('resultsInfo').textContent = `Found ${totalElements} listing${totalElements !== 1 ? 's' : ''}`;
+
+    if (!content.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📦</div>
+        <p>No listings found. Try different filters or <a href="/dashboard.html?tab=create">post one!</a></p></div>`;
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+
+    grid.innerHTML = content.map(l => {
+      const img = l.imageUrls?.length ? `<img class="listing-img" src="${escHtml(l.imageUrls[0])}" alt="" loading="lazy" style="display:block" onerror="this.parentElement.innerHTML='<div class=listing-img style=background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:3rem>${CATS[l.category]||'📦'}</div>'">`
+        : `<div class="listing-img" style="background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:3rem">${CATS[l.category]||'📦'}</div>`;
+      const badge = l.listingType==='I_HAVE' ? '<span class="listing-badge badge-have">I HAVE</span>' : '<span class="listing-badge badge-need">I NEED</span>';
+      const neg = l.negotiable ? ' <small style="color:var(--amber)">Negotiable</small>' : '';
+      return `<div class="listing-card" onclick="window.location.href='/listing-detail.html?id=${l.id}'">
+        ${img}<div class="listing-body">
+        ${badge}
+        <div class="listing-title">${escHtml(l.productName)}</div>
+        <div class="listing-meta">${CATS[l.category]||''} ${l.category?.replace(/_/g,' ')}</div>
+        <div class="listing-price">₹${parseFloat(l.pricePerUnit).toLocaleString('en-IN')} / ${escHtml(l.unit)}${neg}</div>
+        <div class="listing-qty">Available: ${l.availableQuantity} ${escHtml(l.unit)}</div>
+        <div class="listing-location">📍 ${escHtml(l.district)}, ${escHtml(l.state)}</div>
+        <div style="font-size:0.78rem;color:#aaa;margin-top:0.25rem">by ${escHtml(l.sellerName)}</div>
+        </div></div>`;
+    }).join('');
+
+    // Pagination
+    const pages = [];
+    if (number > 0) pages.push(`<button class="page-btn" onclick="goPage(${number-1})">← Prev</button>`);
+    for (let i = Math.max(0, number-2); i <= Math.min(totalPages-1, number+2); i++) {
+      pages.push(`<button class="page-btn ${i===number?'active':''}" onclick="goPage(${i})">${i+1}</button>`);
+    }
+    if (number < totalPages-1) pages.push(`<button class="page-btn" onclick="goPage(${number+1})">Next →</button>`);
+    document.getElementById('pagination').innerHTML = pages.join('');
+  } catch(e) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>Error loading listings. Please try again.</p></div>';
+  }
+}
+
+function goPage(p) { currentPage = p; loadListings(); window.scrollTo(0,0); }
+</script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register — AgroCycle</title>
+<link rel="stylesheet" href="/css/main.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a class="nav-logo" href="/">🌾 AgroCycle</a>
+    <div class="nav-auth"><a href="/login.html" class="btn btn-outline">Login</a></div>
+  </div>
+</nav>
+<div class="form-page">
+  <div class="form-card" style="max-width:600px">
+    <h2>🌾 Join AgroCycle</h2>
+    <p>Create your free farmer/buyer account to buy and sell crop waste</p>
+    <div id="alertBox" class="alert-error hidden"></div>
+    <div id="successBox" class="form-success hidden"></div>
+    <form id="registerForm" onsubmit="doRegister(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="fullName" placeholder="Your full name" required>
+        </div>
+        <div class="form-group">
+          <label>Mobile Number *</label>
+          <input type="tel" id="mobileNumber" placeholder="10-digit mobile" required pattern="[6-9][0-9]{9}">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email Address *</label>
+          <input type="email" id="email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>I primarily want to</label>
+          <select id="preferredActivity">
+            <option value="BOTH">Buy &amp; Sell Both</option>
+            <option value="I_HAVE">Sell (I HAVE)</option>
+            <option value="I_NEED">Buy (I NEED)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Password *</label>
+          <input type="password" id="password" placeholder="Minimum 8 characters" required minlength="8">
+        </div>
+        <div class="form-group">
+          <label>Confirm Password *</label>
+          <input type="password" id="confirmPassword" placeholder="Repeat password" required>
+        </div>
+      </div>
+      <hr style="margin:1rem 0;border-color:#eee">
+      <p style="font-weight:600;color:var(--green);margin-bottom:0.75rem">📍 Your Location</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Village / Town *</label>
+          <input type="text" id="village" placeholder="Your village or town" required>
+        </div>
+        <div class="form-group">
+          <label>District *</label>
+          <input type="text" id="district" placeholder="Your district" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>State *</label>
+          <input type="text" id="state" placeholder="Your state" required>
+        </div>
+        <div class="form-group">
+          <label>Postal Code</label>
+          <input type="text" id="postalCode" placeholder="6-digit PIN" maxlength="6">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Latitude (optional)</label>
+          <input type="number" id="latitude" step="any" placeholder="e.g. 28.6139">
+        </div>
+        <div class="form-group">
+          <label>Longitude (optional)</label>
+          <input type="number" id="longitude" step="any" placeholder="e.g. 77.2090">
+        </div>
+      </div>
+      <button type="button" onclick="getLocation()" class="btn btn-outline" style="color:var(--green);border-color:var(--green);margin-bottom:1rem">📍 Use My Location</button>
+      <button type="submit" class="btn btn-primary w-full btn-lg" id="submitBtn">Create Account</button>
+    </form>
+    <div style="text-align:center;margin-top:1rem;">
+      Already registered? <a href="/login.html">Sign In</a>
+    </div>
+  </div>
+</div>
+<script src="/js/common.js"></script>
+<script>
+async function doRegister(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  const alertBox = document.getElementById('alertBox');
+  const successBox = document.getElementById('successBox');
+  alertBox.classList.add('hidden');
+  successBox.classList.add('hidden');
+
+  const pass = document.getElementById('password').value;
+  const confirm = document.getElementById('confirmPassword').value;
+  if (pass !== confirm) { alertBox.textContent = 'Passwords do not match'; alertBox.classList.remove('hidden'); return; }
+
+  btn.disabled = true; btn.textContent = 'Creating account...';
+  try {
+    const body = {
+      fullName: document.getElementById('fullName').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      mobileNumber: document.getElementById('mobileNumber').value.trim(),
+      password: pass, confirmPassword: confirm,
+      village: document.getElementById('village').value.trim(),
+      district: document.getElementById('district').value.trim(),
+      state: document.getElementById('state').value.trim(),
+      postalCode: document.getElementById('postalCode').value.trim(),
+      latitude: document.getElementById('latitude').value || null,
+      longitude: document.getElementById('longitude').value || null,
+      preferredActivity: document.getElementById('preferredActivity').value
+    };
+    const res = await fetch('/api/auth/register', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      if (data.fields) alertBox.textContent = Object.values(data.fields).join(', ');
+      else alertBox.textContent = data.error || 'Registration failed';
+      alertBox.classList.remove('hidden');
+    } else {
+      successBox.textContent = `Account created! Welcome, ${data.fullName}. Redirecting to login...`;
+      successBox.classList.remove('hidden');
+      document.getElementById('registerForm').style.display = 'none';
+      setTimeout(() => window.location.href = '/login.html', 2000);
+    }
+  } catch(err) { alertBox.textContent = 'Connection error. Please try again.'; alertBox.classList.remove('hidden'); }
+  finally { btn.disabled = false; btn.textContent = 'Create Account'; }
+}
+
+function getLocation() {
+  if (!navigator.geolocation) { alert('Geolocation not supported by your browser'); return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    document.getElementById('latitude').value = pos.coords.latitude.toFixed(6);
+    document.getElementById('longitude').value = pos.coords.longitude.toFixed(6);
+  }, () => alert('Could not get location. Please enter manually.'));
+}
+</script>
+</body>
+</html>

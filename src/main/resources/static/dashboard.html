@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Dashboard — AgroCycle</title>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <style>
+    body{background:#f4f8f4;}
+    .dash-layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 64px);max-width:1200px;margin:0 auto;gap:0;}
+    .sidebar{background:#1a4a1a;color:#fff;padding:28px 0;}
+    .sidebar-user{padding:0 20px 24px;border-bottom:1px solid rgba(255,255,255,.15);margin-bottom:16px;}
+    .sidebar-user .avatar{width:56px;height:56px;border-radius:50%;background:#2d6a2d;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-bottom:10px;}
+    .sidebar-user .name{font-weight:600;font-size:1rem;}
+    .sidebar-user .role-badge{font-size:.75rem;background:rgba(255,255,255,.15);padding:2px 8px;border-radius:20px;display:inline-block;margin-top:4px;}
+    .sidebar-nav a{display:flex;align-items:center;gap:10px;padding:12px 20px;color:rgba(255,255,255,.8);text-decoration:none;transition:all .2s;font-size:.95rem;}
+    .sidebar-nav a:hover,.sidebar-nav a.active{background:#2d6a2d;color:#fff;}
+    .sidebar-nav a .icon{font-size:1.1rem;width:20px;}
+    .main-content{padding:28px;overflow-x:hidden;}
+    .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+    .section-header h2{color:#1a4a1a;font-size:1.4rem;}
+    .dash-card{background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:24px;}
+    /* Stats row */
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-bottom:24px;}
+    .stat-box{background:#fff;border-radius:10px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+    .stat-box .num{font-size:2rem;font-weight:700;color:#2d6a2d;}
+    .stat-box .lbl{color:#777;font-size:.85rem;margin-top:4px;}
+    /* Modal */
+    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+    .modal-backdrop.open{display:flex;}
+    .modal{background:#fff;border-radius:16px;padding:32px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;}
+    .modal h3{color:#1a4a1a;font-size:1.4rem;margin-bottom:20px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .form-grid .full{grid-column:1/-1;}
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    .form-group label{font-size:.9rem;font-weight:600;color:#444;}
+    .form-group input,.form-group select,.form-group textarea{padding:10px 14px;border:1.5px solid #ddd;border-radius:8px;font-size:.95rem;transition:border-color .2s;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#2d6a2d;outline:none;}
+    .form-group textarea{resize:vertical;min-height:80px;}
+    .btn-primary{background:#2d6a2d;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:1rem;cursor:pointer;font-weight:600;}
+    .btn-primary:hover{background:#1a4a1a;}
+    .btn-secondary{background:#f0f0f0;color:#333;border:none;padding:12px 24px;border-radius:8px;font-size:1rem;cursor:pointer;}
+    .btn-danger{background:#dc3545;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:.85rem;cursor:pointer;}
+    .btn-edit{background:#f5a623;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:.85rem;cursor:pointer;}
+    /* Listing cards */
+    .listing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+    .listing-card{background:#f9f9f9;border:1px solid #e8e8e8;border-radius:10px;padding:18px;position:relative;}
+    .listing-card .badge{position:absolute;top:12px;right:12px;padding:4px 10px;border-radius:20px;font-size:.75rem;font-weight:600;}
+    .badge-active{background:#d4edda;color:#155724;}
+    .badge-sold_out{background:#fff3cd;color:#856404;}
+    .badge-inactive{background:#f8d7da;color:#721c24;}
+    .listing-card h4{color:#1a4a1a;margin:0 0 6px;padding-right:80px;}
+    .listing-card .meta{color:#666;font-size:.85rem;margin:4px 0;}
+    .listing-card .price{color:#2d6a2d;font-weight:700;font-size:1.1rem;margin:8px 0;}
+    .listing-card .actions{display:flex;gap:8px;margin-top:12px;}
+    /* Order cards */
+    .order-card{background:#f9f9f9;border:1px solid #e8e8e8;border-radius:10px;padding:18px;margin-bottom:12px;}
+    .order-card .order-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+    .order-card h4{color:#1a4a1a;margin:0;}
+    .status-badge{padding:4px 10px;border-radius:20px;font-size:.75rem;font-weight:600;}
+    .status-PENDING_SELLER{background:#fff3cd;color:#856404;}
+    .status-ACCEPTED,.status-COMPLETED{background:#d4edda;color:#155724;}
+    .status-REJECTED,.status-CANCELLED{background:#f8d7da;color:#721c24;}
+    .status-SEARCHING_DELIVERY,.status-DELIVERY_PENDING{background:#d1ecf1;color:#0c5460;}
+    .status-DELIVERY_ACCEPTED,.status-PICKED_UP,.status-IN_TRANSIT{background:#cce5ff;color:#004085;}
+    .status-DELIVERED{background:#d4edda;color:#155724;}
+    .empty-state{text-align:center;padding:40px;color:#888;}
+    .empty-state .icon{font-size:3rem;margin-bottom:12px;}
+    /* Image preview */
+    .img-preview{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+    .img-preview img{width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #ddd;}
+    /* Camera */
+    #cameraSection{margin-top:10px;display:none;}
+    #videoFeed{width:100%;max-width:320px;border-radius:8px;}
+    .tab-buttons{display:flex;gap:0;border-bottom:2px solid #e8e8e8;margin-bottom:24px;}
+    .tab-btn{padding:12px 24px;background:none;border:none;cursor:pointer;font-size:1rem;color:#777;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;}
+    .tab-btn.active{color:#2d6a2d;border-bottom-color:#2d6a2d;font-weight:600;}
+    .tab-pane{display:none;}
+    .tab-pane.active{display:block;}
+    .alert-success{background:#d4edda;color:#155724;padding:12px 16px;border-radius:8px;margin-bottom:16px;}
+    .alert-error{background:#f8d7da;color:#721c24;padding:12px 16px;border-radius:8px;margin-bottom:16px;}
+    .type-selector{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;}
+    .type-option{padding:14px;border:2px solid #ddd;border-radius:10px;cursor:pointer;text-align:center;transition:all .2s;}
+    .type-option.selected{border-color:#2d6a2d;background:#f0f8f0;}
+    .type-option .type-icon{font-size:1.8rem;margin-bottom:4px;}
+    .type-option .type-label{font-weight:600;color:#333;}
+    .type-option .type-desc{font-size:.8rem;color:#666;margin-top:2px;}
+    @media(max-width:768px){.dash-layout{grid-template-columns:1fr;}.sidebar{display:none;}.form-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/" class="logo">🌿 AgroCycle</a>
+    <div class="nav-links">
+      <a href="/marketplace.html">Marketplace</a>
+      <a href="/how-it-works.html">How It Works</a>
+    </div>
+    <div class="nav-auth">
+      <span id="notifBell" class="hidden" style="cursor:pointer;position:relative;" onclick="window.location='/dashboard.html'">
+        🔔 <span id="notifCount" class="hidden" style="position:absolute;top:-4px;right:-4px;background:#dc3545;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.7rem;display:flex;align-items:center;justify-content:center;"></span>
+      </span>
+      <span id="userGreet" style="color:#fff;font-weight:600;"></span>
+      <button onclick="doLogout()" class="btn-outline" style="color:#fff;border-color:#fff;">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="dash-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-user">
+      <div class="avatar" id="sidebarAvatar">👤</div>
+      <div class="name" id="sidebarName">Loading...</div>
+      <div class="role-badge" id="sidebarRole">--</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="active" onclick="showTab('listings')"><span class="icon">📋</span> My Listings</a>
+      <a href="#" onclick="showTab('buying')"><span class="icon">🛒</span> My Purchases</a>
+      <a href="#" onclick="showTab('selling')"><span class="icon">💰</span> My Sales</a>
+      <a href="/marketplace.html"><span class="icon">🏪</span> Marketplace</a>
+      <a href="/how-it-works.html"><span class="icon">❓</span> How It Works</a>
+      <a href="#" onclick="showTab('profile')"><span class="icon">⚙️</span> Profile</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <div id="alertBox"></div>
+
+    <!-- Stats -->
+    <div class="stats-row" id="statsRow">
+      <div class="stat-box"><div class="num" id="statListings">-</div><div class="lbl">My Listings</div></div>
+      <div class="stat-box"><div class="num" id="statPurchases">-</div><div class="lbl">Purchases</div></div>
+      <div class="stat-box"><div class="num" id="statSales">-</div><div class="lbl">Sales</div></div>
+      <div class="stat-box"><div class="num" id="statPending">-</div><div class="lbl">Pending Actions</div></div>
+    </div>
+
+    <!-- LISTINGS TAB -->
+    <div class="tab-pane active" id="tab-listings">
+      <div class="section-header">
+        <h2>My Listings</h2>
+        <button class="btn-primary" onclick="openCreateModal()">+ Post Crop Waste / Need</button>
+      </div>
+      <div class="listing-grid" id="listingsGrid"><div class="empty-state"><div class="icon">🌾</div><p>Loading your listings...</p></div></div>
+    </div>
+
+    <!-- BUYING TAB -->
+    <div class="tab-pane" id="tab-buying">
+      <div class="section-header"><h2>My Purchases</h2></div>
+      <div id="buyingList"><div class="empty-state"><div class="icon">🛒</div><p>Loading purchases...</p></div></div>
+    </div>
+
+    <!-- SELLING TAB -->
+    <div class="tab-pane" id="tab-selling">
+      <div class="section-header"><h2>My Sales (Orders Received)</h2></div>
+      <div id="sellingList"><div class="empty-state"><div class="icon">💰</div><p>Loading sales...</p></div></div>
+    </div>
+
+    <!-- PROFILE TAB -->
+    <div class="tab-pane" id="tab-profile">
+      <div class="dash-card">
+        <h3 style="color:#1a4a1a;margin-bottom:20px;">My Profile</h3>
+        <div id="profileInfo" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Create/Edit Listing Modal -->
+<div class="modal-backdrop" id="listingModal">
+  <div class="modal">
+    <h3 id="modalTitle">Post Crop Waste / Request</h3>
+
+    <!-- Listing Type Selector -->
+    <div class="form-group full" style="margin-bottom:16px;">
+      <label>What do you want to do?</label>
+      <div class="type-selector">
+        <div class="type-option selected" id="typeHave" onclick="selectType('I_HAVE')">
+          <div class="type-icon">🌾</div>
+          <div class="type-label">I HAVE</div>
+          <div class="type-desc">Post material for sale or exchange</div>
+        </div>
+        <div class="type-option" id="typeNeed" onclick="selectType('I_NEED')">
+          <div class="type-icon">🛒</div>
+          <div class="type-label">I NEED</div>
+          <div class="type-desc">Post what you're looking for</div>
+        </div>
+      </div>
+    </div>
+
+    <form id="listingForm" onsubmit="submitListing(event)">
+      <input type="hidden" id="editListingId"/>
+      <input type="hidden" id="listingTypeField" value="I_HAVE"/>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Product Name *</label>
+          <input type="text" id="productName" placeholder="e.g. Paddy Straw, Rice Husk, Wheat Straw" required maxlength="200"/>
+        </div>
+        <div class="form-group">
+          <label>Category *</label>
+          <select id="category" required>
+            <option value="">-- Select Category --</option>
+            <option value="PADDY_STRAW_RICE_HUSK">Paddy Straw / Rice Husk</option>
+            <option value="WHEAT_STRAW">Wheat Straw</option>
+            <option value="SUGARCANE_LEAVES_BAGASSE">Sugarcane Leaves / Bagasse</option>
+            <option value="COTTON_STALKS">Cotton Stalks</option>
+            <option value="GROUNDNUT_SHELLS">Groundnut Shells</option>
+            <option value="COCONUT_HUSK">Coconut Husk</option>
+            <option value="MAIZE_STALKS">Maize Stalks</option>
+            <option value="VEGETABLE_WASTE">Vegetable Waste</option>
+            <option value="FRUIT_WASTE">Fruit Waste</option>
+            <option value="OTHER_RESIDUES">Other Residues</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Condition</label>
+          <input type="text" id="condition" placeholder="e.g. Dry, Fresh, Baled"/>
+        </div>
+        <div class="form-group">
+          <label>Total Quantity *</label>
+          <input type="number" id="totalQuantity" placeholder="e.g. 500" min="0.01" step="0.01" required/>
+        </div>
+        <div class="form-group">
+          <label>Unit *</label>
+          <select id="unit" required>
+            <option value="kg">kg</option>
+            <option value="tonnes">tonnes</option>
+            <option value="quintals">quintals</option>
+            <option value="bags">bags</option>
+            <option value="bundles">bundles</option>
+            <option value="truckloads">truckloads</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Price per Unit (₹) *</label>
+          <input type="number" id="pricePerUnit" placeholder="e.g. 2.50" min="0" step="0.01" required/>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="negotiable" style="width:auto;"/>
+            Price is Negotiable
+          </label>
+        </div>
+        <div class="form-group full">
+          <label>Description</label>
+          <textarea id="description" placeholder="Describe the material, quantity available, any special details..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Village / Town *</label>
+          <input type="text" id="village" placeholder="Your village or town" required/>
+        </div>
+        <div class="form-group">
+          <label>District *</label>
+          <input type="text" id="district" placeholder="District" required/>
+        </div>
+        <div class="form-group">
+          <label>State *</label>
+          <input type="text" id="state" placeholder="State" required/>
+        </div>
+        <div class="form-group">
+          <label>Postal Code</label>
+          <input type="text" id="postalCode" placeholder="e.g. 500001" maxlength="10"/>
+        </div>
+        <div class="form-group full">
+          <label>Photos (optional, max 5)</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <label class="btn-secondary" style="cursor:pointer;display:inline-block;">
+              📁 Upload Image
+              <input type="file" id="imageUpload" accept="image/*" multiple style="display:none;" onchange="previewImages(event)"/>
+            </label>
+            <button type="button" class="btn-secondary" onclick="toggleCamera()">📷 Take Photo</button>
+          </div>
+          <div id="cameraSection">
+            <video id="videoFeed" autoplay playsinline></video><br/>
+            <button type="button" class="btn-primary" style="margin-top:8px;" onclick="capturePhoto()">📸 Capture</button>
+            <button type="button" class="btn-secondary" style="margin-top:8px;" onclick="stopCamera()">✕ Stop</button>
+          </div>
+          <div class="img-preview" id="imgPreview"></div>
+          <canvas id="photoCanvas" style="display:none;"></canvas>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end;">
+        <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn-primary" id="submitBtn">Post Listing</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Order Respond Modal -->
+<div class="modal-backdrop" id="orderModal">
+  <div class="modal" style="max-width:500px;">
+    <h3 id="orderModalTitle">Order Request</h3>
+    <div id="orderModalBody"></div>
+    <div style="display:flex;gap:12px;margin-top:20px;justify-content:flex-end;">
+      <button class="btn-secondary" onclick="closeOrderModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/common.js"></script>
+<script>
+let user = null;
+let myListings = [];
+let myBuying = [];
+let mySelling = [];
+let capturedImages = [];
+let stream = null;
+let currentListingType = 'I_HAVE';
+let editMode = false;
+
+async function init() {
+  user = await checkAuth();
+  if (!user) { window.location.href = '/login.html?redirect=/dashboard.html'; return; }
+  document.getElementById('userGreet').textContent = '👤 ' + user.fullName.split(' ')[0];
+  document.getElementById('sidebarName').textContent = user.fullName;
+  document.getElementById('sidebarRole').textContent = user.role.replace('_', ' ');
+  document.getElementById('sidebarAvatar').textContent = user.fullName.charAt(0).toUpperCase();
+  if (user.role === 'ADMIN') { window.location.href = '/admin.html'; return; }
+  // Prefill location from user profile
+  document.getElementById('village').value = user.village || '';
+  document.getElementById('district').value = user.district || '';
+  document.getElementById('state').value = user.state || '';
+  document.getElementById('postalCode').value = user.postalCode || '';
+  loadAll();
+}
+
+async function loadAll() {
+  await Promise.all([loadListings(), loadBuying(), loadSelling()]);
+  updateStats();
+  loadProfile();
+}
+
+async function loadListings() {
+  const res = await apiFetch('/api/listings/my');
+  if (!res || !res.ok) return;
+  myListings = await res.json();
+  renderListings();
+}
+
+async function loadBuying() {
+  const res = await apiFetch('/api/orders/my/buying');
+  if (!res || !res.ok) return;
+  myBuying = await res.json();
+  renderBuying();
+}
+
+async function loadSelling() {
+  const res = await apiFetch('/api/orders/my/selling');
+  if (!res || !res.ok) return;
+  mySelling = await res.json();
+  renderSelling();
+}
+
+function updateStats() {
+  document.getElementById('statListings').textContent = myListings.length;
+  document.getElementById('statPurchases').textContent = myBuying.length;
+  document.getElementById('statSales').textContent = mySelling.length;
+  const pending = mySelling.filter(o => o.status === 'PENDING_SELLER').length + myBuying.filter(o => o.status === 'DELIVERED').length;
+  document.getElementById('statPending').textContent = pending;
+}
+
+function renderListings() {
+  const grid = document.getElementById('listingsGrid');
+  if (!myListings.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="icon">🌾</div><p>No listings yet.<br><strong>Click "Post Crop Waste / Need" to create your first listing!</strong></p></div>';
+    return;
+  }
+  grid.innerHTML = myListings.map(l => `
+    <div class="listing-card">
+      <span class="badge badge-${l.status.toLowerCase()}">${l.status.replace('_',' ')}</span>
+      ${l.imageUrls && l.imageUrls.length ? `<img src="${l.imageUrls[0]}" style="width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:10px;"/>` : ''}
+      <h4>${l.productName}</h4>
+      <div class="meta">📦 ${l.availableQuantity} ${l.unit} available | ${l.listingType === 'I_HAVE' ? '🏷️ For Sale' : '🛒 Wanted'}</div>
+      <div class="meta">📍 ${l.village}, ${l.district}, ${l.state}</div>
+      <div class="price">₹${l.pricePerUnit}/${l.unit} ${l.negotiable ? '(Negotiable)' : ''}</div>
+      <div class="actions">
+        <button class="btn-edit" onclick="editListing(${l.id})">✏️ Edit</button>
+        <button class="btn-danger" onclick="deleteListing(${l.id})">🗑️ Delete</button>
+        <a href="/listing-detail.html?id=${l.id}" class="btn-secondary" style="padding:8px 16px;border-radius:6px;font-size:.85rem;text-decoration:none;">👁️ View</a>
+      </div>
+    </div>`).join('');
+}
+
+function renderBuying() {
+  const div = document.getElementById('buyingList');
+  if (!myBuying.length) { div.innerHTML = '<div class="empty-state"><div class="icon">🛒</div><p>No purchases yet. <a href="/marketplace.html">Browse the marketplace</a> to find crop materials.</p></div>'; return; }
+  div.innerHTML = myBuying.map(o => `
+    <div class="order-card">
+      <div class="order-header">
+        <h4>Order #${o.id} — ${o.productName}</h4>
+        <span class="status-badge status-${o.status}">${o.status.replace(/_/g,' ')}</span>
+      </div>
+      <p style="color:#555;font-size:.9rem;">Seller: <strong>${o.sellerName}</strong> | Qty: ${o.requestedQuantity} ${o.unit} | Total: ₹${o.totalAmount}</p>
+      <p style="color:#555;font-size:.9rem;">Delivery: ${o.deliveryAddress}</p>
+      ${o.status === 'PENDING_SELLER' ? `<button class="btn-danger" onclick="cancelOrder(${o.id})" style="margin-top:8px;">Cancel Request</button>` : ''}
+      ${o.status === 'DELIVERED' ? `<button class="btn-primary" onclick="confirmReceipt(${o.id})" style="margin-top:8px;">✅ Confirm Receipt</button>` : ''}
+      ${o.deliveryOtp ? `<div style="margin-top:8px;background:#fff3cd;padding:8px 12px;border-radius:6px;"><strong>Delivery OTP: ${o.deliveryOtp}</strong> — Share this with the delivery person</div>` : ''}
+    </div>`).join('');
+}
+
+function renderSelling() {
+  const div = document.getElementById('sellingList');
+  if (!mySelling.length) { div.innerHTML = '<div class="empty-state"><div class="icon">💰</div><p>No orders received yet. Your listing orders will appear here.</p></div>'; return; }
+  div.innerHTML = mySelling.map(o => `
+    <div class="order-card">
+      <div class="order-header">
+        <h4>Order #${o.id} — ${o.productName}</h4>
+        <span class="status-badge status-${o.status}">${o.status.replace(/_/g,' ')}</span>
+      </div>
+      <p style="color:#555;font-size:.9rem;">Buyer: <strong>${o.buyerName}</strong> | Qty: ${o.requestedQuantity} ${o.unit} | Total: ₹${o.totalAmount}</p>
+      <p style="color:#555;font-size:.9rem;">Delivery to: ${o.deliveryAddress}</p>
+      ${o.status === 'PENDING_SELLER' ? `
+        <div style="display:flex;gap:10px;margin-top:10px;">
+          <button class="btn-primary" onclick="respondToOrder(${o.id}, true)">✅ Accept</button>
+          <button class="btn-danger" onclick="respondToOrder(${o.id}, false)">❌ Reject</button>
+        </div>` : ''}
+    </div>`).join('');
+}
+
+function loadProfile() {
+  const d = document.getElementById('profileInfo');
+  if (!user) return;
+  const fields = [
+    ['Full Name', user.fullName], ['Email', user.email],
+    ['Mobile', user.mobileNumber], ['Role', user.role],
+    ['Village', user.village], ['District', user.district],
+    ['State', user.state], ['Postal Code', user.postalCode || '—'],
+    ['Activity', user.preferredActivity], ['Member Since', new Date(user.createdAt).toLocaleDateString()],
+  ];
+  d.innerHTML = fields.map(([k,v]) => `<div style="background:#f4f8f4;padding:12px;border-radius:8px;"><div style="color:#888;font-size:.8rem;">${k}</div><div style="color:#1a4a1a;font-weight:600;">${v}</div></div>`).join('');
+}
+
+// ---- Tab switching ----
+function showTab(name, el) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'selling') loadSelling();
+  if (name === 'buying') loadBuying();
+  if (name === 'listings') loadListings();
+}
+
+// ---- Listing Type ----
+function selectType(type) {
+  currentListingType = type;
+  document.getElementById('listingTypeField').value = type;
+  document.getElementById('typeHave').classList.toggle('selected', type === 'I_HAVE');
+  document.getElementById('typeNeed').classList.toggle('selected', type === 'I_NEED');
+}
+
+// ---- Modal ----
+function openCreateModal() {
+  editMode = false;
+  document.getElementById('modalTitle').textContent = 'Post Crop Waste / Request Material';
+  document.getElementById('listingForm').reset();
+  document.getElementById('editListingId').value = '';
+  document.getElementById('imgPreview').innerHTML = '';
+  capturedImages = [];
+  selectType('I_HAVE');
+  // Pre-fill location from user
+  document.getElementById('village').value = user.village || '';
+  document.getElementById('district').value = user.district || '';
+  document.getElementById('state').value = user.state || '';
+  document.getElementById('postalCode').value = user.postalCode || '';
+  document.getElementById('listingModal').classList.add('open');
+}
+
+function editListing(id) {
+  editMode = true;
+  const l = myListings.find(x => x.id === id);
+  if (!l) return;
+  document.getElementById('modalTitle').textContent = 'Edit Listing';
+  document.getElementById('editListingId').value = l.id;
+  document.getElementById('productName').value = l.productName;
+  document.getElementById('category').value = l.category;
+  document.getElementById('condition').value = l.condition || '';
+  document.getElementById('totalQuantity').value = l.totalQuantity;
+  document.getElementById('unit').value = l.unit;
+  document.getElementById('pricePerUnit').value = l.pricePerUnit;
+  document.getElementById('negotiable').checked = l.negotiable;
+  document.getElementById('description').value = l.description || '';
+  document.getElementById('village').value = l.village;
+  document.getElementById('district').value = l.district;
+  document.getElementById('state').value = l.state;
+  document.getElementById('postalCode').value = l.postalCode || '';
+  selectType(l.listingType);
+  document.getElementById('listingModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('listingModal').classList.remove('open');
+  stopCamera();
+}
+
+// ---- Submit Listing ----
+async function submitListing(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  const body = {
+    productName: document.getElementById('productName').value.trim(),
+    category: document.getElementById('category').value,
+    condition: document.getElementById('condition').value.trim(),
+    totalQuantity: parseFloat(document.getElementById('totalQuantity').value),
+    unit: document.getElementById('unit').value,
+    pricePerUnit: parseFloat(document.getElementById('pricePerUnit').value),
+    negotiable: document.getElementById('negotiable').checked,
+    description: document.getElementById('description').value.trim(),
+    village: document.getElementById('village').value.trim(),
+    district: document.getElementById('district').value.trim(),
+    state: document.getElementById('state').value.trim(),
+    postalCode: document.getElementById('postalCode').value.trim(),
+    listingType: document.getElementById('listingTypeField').value
+  };
+
+  const editId = document.getElementById('editListingId').value;
+  const url = editId ? `/api/listings/${editId}` : '/api/listings';
+  const method = editId ? 'PUT' : 'POST';
+
+  try {
+    const res = await apiFetch(url, { method, body: JSON.stringify(body) });
+    if (!res) return;
+    if (!res.ok) {
+      const err = await res.json();
+      showAlert(err.error || 'Failed to save listing', 'error');
+      return;
+    }
+    const saved = await res.json();
+    
+    // Upload images if any
+    const files = document.getElementById('imageUpload').files;
+    for (let i = 0; i < files.length; i++) {
+      const fd = new FormData();
+      fd.append('file', files[i]);
+      await fetch(`/api/listings/${saved.id}/images`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'X-XSRF-TOKEN': getCsrfToken() },
+        body: fd
+      });
+    }
+    // Upload captured photos
+    for (const blob of capturedImages) {
+      const fd = new FormData();
+      fd.append('file', blob, 'photo.jpg');
+      await fetch(`/api/listings/${saved.id}/images`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'X-XSRF-TOKEN': getCsrfToken() },
+        body: fd
+      });
+    }
+
+    showAlert(editId ? 'Listing updated successfully!' : 'Listing posted successfully! 🎉', 'success');
+    closeModal();
+    await loadListings();
+    updateStats();
+    showTab('listings');
+  } catch(err) {
+    showAlert('Error: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = editId ? 'Update Listing' : 'Post Listing';
+  }
+}
+
+// ---- Delete Listing ----
+async function deleteListing(id) {
+  if (!confirm('Delete this listing?')) return;
+  const res = await apiFetch(`/api/listings/${id}`, { method: 'DELETE' });
+  if (res && res.ok) { showAlert('Listing deleted.', 'success'); await loadListings(); updateStats(); }
+}
+
+// ---- Orders ----
+async function respondToOrder(orderId, accept) {
+  const reason = accept ? '' : (prompt('Reason for rejection (optional):') || '');
+  const url = `/api/orders/${orderId}/respond?accept=${accept}${reason ? '&reason=' + encodeURIComponent(reason) : ''}`;
+  const res = await apiFetch(url, { method: 'POST' });
+  if (res && res.ok) { showAlert(accept ? 'Order accepted! Delivery matching started.' : 'Order rejected.', 'success'); await loadSelling(); updateStats(); }
+  else { const e = await res?.json(); showAlert(e?.error || 'Failed', 'error'); }
+}
+
+async function cancelOrder(orderId) {
+  if (!confirm('Cancel this order?')) return;
+  const res = await apiFetch(`/api/orders/${orderId}/cancel`, { method: 'POST' });
+  if (res && res.ok) { showAlert('Order cancelled.', 'success'); await loadBuying(); updateStats(); }
+}
+
+async function confirmReceipt(orderId) {
+  if (!confirm('Confirm you received this order?')) return;
+  const res = await apiFetch(`/api/orders/${orderId}/confirm-receipt`, { method: 'POST' });
+  if (res && res.ok) { showAlert('Receipt confirmed! Please leave a review.', 'success'); await loadBuying(); updateStats(); }
+}
+
+// ---- Camera ----
+function toggleCamera() {
+  const sec = document.getElementById('cameraSection');
+  if (sec.style.display === 'none' || !sec.style.display) {
+    sec.style.display = 'block';
+    startCamera();
+  } else {
+    stopCamera();
+    sec.style.display = 'none';
+  }
+}
+async function startCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    document.getElementById('videoFeed').srcObject = stream;
+  } catch(e) { showAlert('Camera not available: ' + e.message, 'error'); }
+}
+function stopCamera() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  document.getElementById('cameraSection').style.display = 'none';
+}
+function capturePhoto() {
+  const video = document.getElementById('videoFeed');
+  const canvas = document.getElementById('photoCanvas');
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  canvas.toBlob(blob => {
+    if (capturedImages.length >= 5) { showAlert('Maximum 5 images allowed', 'error'); return; }
+    capturedImages.push(blob);
+    const url = URL.createObjectURL(blob);
+    const img = document.createElement('img');
+    img.src = url;
+    document.getElementById('imgPreview').appendChild(img);
+    showAlert('Photo captured!', 'success');
+  }, 'image/jpeg', 0.9);
+}
+function previewImages(e) {
+  const files = e.target.files;
+  const preview = document.getElementById('imgPreview');
+  for (const file of files) {
+    if (capturedImages.length + preview.children.length >= 5) { showAlert('Max 5 images', 'error'); break; }
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(file);
+    preview.appendChild(img);
+  }
+}
+
+// ---- Logout ----
+async function doLogout() {
+  await apiFetch('/api/auth/logout', { method: 'POST' });
+  window.location.href = '/';
+}
+
+// ---- Alert ----
+function showAlert(msg, type) {
+  const box = document.getElementById('alertBox');
+  box.innerHTML = `<div class="alert-${type}" style="margin-bottom:16px;">${msg}</div>`;
+  setTimeout(() => box.innerHTML = '', 4000);
+}
+
+function closeOrderModal() { document.getElementById('orderModal').classList.remove('open'); }
+
+init();
+</script>
+</body>
+</html>
